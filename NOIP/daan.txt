@@ -1,0 +1,108 @@
+#include<bits/stdc++.h>//n个数，每个数有m种方案，允许重复
+using namespace std;//子程序版本 
+int  n,m,sn=0,fu[100005],fz[20005][20005],sm[100005][2];
+long long sum,mins=1e16;
+struct q{int a,b, v=0;}s[300005];
+
+bool cmp(q a,q b){return a.v<b.v;}//b指向a,a为父节点。 
+
+int prim(){
+
+int sum=0;
+
+bool c[200005]={0};//c[i]==1代表第i个点已经连入
+
+c[1]=1;//将第一个点连入。  
+
+for(int ss=1;ss<n;ss++){//连入的点等于n个就退出。 //ss为最小生成树的总边数。
+
+for(int i=1;i<=m;i++) {//在m条边中寻找已经连入的点。
+
+        int aa=s[i].a,bb=s[i].b;
+
+    if(c[aa]+c[bb]==1&&s[i].v<=1e9){//一个用过，一个没用过。<=1e9用来屏蔽 
+
+    sum+=s[i].v; 
+
+sm[ss][0]=i;sm[ss][1]=s[i].v;//记录第ss条生成边是第i条边，长为v 
+
+if(c[aa]) {c[bb]=1;fu[bb]=aa;}//标用过。//记录b节点的父a。
+
+else {c[aa]=1;fu[aa]=bb;}        
+
+    break;
+
+}
+
+}
+
+}
+
+return sum;
+
+}
+
+void fjd(){//生成父子关系数组。fz[i][j]==1 代表j是i的后代 
+
+for(int i=2;i<=n;i++) {
+
+int fq=fu[i];
+
+while(fq!=0){
+
+fz[fq][i]=1;
+
+fq=fu[fq];
+
+}
+
+fz[i][i]=1; //加入自己，当和上级失去联系时，自己和自己后代自成一片。
+
+}
+
+}
+
+int prim2(){//更换第i条边，且能将两片节点连接在一起的最短边。按最小值模板记录。
+
+    for(int i=1;i<n;i++) {//依次更换边共n-1边。
+
+    int jie;//被断开的节点。     
+
+if(fu[s[sm[i][0]].a]==s[sm[i][0]].b) jie=s[sm[i][0]].a;
+
+else jie=s[sm[i][0]].b;
+
+    for(int j=sm[i][0]+1;j<=m;j++){//遍历所有边，（从替换边后开始。） 
+
+if(fz[jie][s[j].b]+fz[jie][s[j].a]==1&&s[j].v>sm[i][1]) {
+
+if(s[j].v-sm[i][1]<mins) mins=s[j].v-sm[i][1];
+
+break;
+
+}      
+
+}
+
+    }
+
+    return mins;
+
+}
+
+int main() {
+
+cin>>n>>m;
+
+    for(int i=1;i<=m;i++){cin>>s[i].a>>s[i].b>>s[i].v;}//写入邻接链表。
+
+    sort(s+1,s+m+1,cmp);
+
+    sum=prim();//算出最小路径 
+
+    fjd(); //按最小路径得到父子关系二维列表 
+
+cout<<sum+prim2();
+
+}
+
